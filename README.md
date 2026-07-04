@@ -16,7 +16,8 @@
 Heart Disease/
 ├── detection.ipynb                # EDA, model training, evaluation notebook
 ├── app.py                         # Flask API server
-├── heart.csv                      # Cleveland Heart Disease dataset (1025 rows)
+├── heart.csv                      # Raw Cleveland Heart Disease dataset (1025 rows)
+├── Heart_cleaned.csv              # Cleaned dataset (303 unique rows, labels corrected)
 ├── best_heart_disease_model.pkl   # Saved best model (Random Forest pipeline)
 ├── templates/
 │   └── index.html                 # Premium dark-mode frontend (CardioScan AI)
@@ -36,6 +37,7 @@ Heart Disease/
 | Test Accuracy       | **95.61%**                                               |
 | Precision (Disease) | 92%                                                      |
 | Recall (Disease)    | 100%                                                     |
+| Training Dataset    | `Heart_cleaned.csv` (303 rows, deduplicated & label-corrected) |
 
 ### Input Features (13 clinical attributes)
 
@@ -111,9 +113,13 @@ Accepts a JSON body with all 13 features and returns a prediction.
 
 ---
 
-## High-Risk Test Case
+## Test Cases
 
-Use this patient profile to verify the model is working correctly — it should always return `prediction: 1` (High Risk):
+Use these patient profiles to verify the model is working correctly.
+
+### High-Risk Patient
+
+*Age 67, Male, Typical Angina, High BP, Elevated Cholesterol, Low Max HR, Exercise Angina, High ST Depression, 3 vessels colored, Reversible Thal Defect.*
 
 ```python
 import pandas as pd, joblib
@@ -131,16 +137,43 @@ proba = model.predict_proba(patient)[0]
 
 print(f"Prediction  : {'⚠ HIGH RISK' if pred == 1 else '✓ Low Risk'}")
 print(f"Probability : No Disease={proba[0]:.2%}  |  Heart Disease={proba[1]:.2%}")
-# Expected → Prediction: ⚠ HIGH RISK | Heart Disease=99.50%
+# Expected → Prediction: ⚠ HIGH RISK
+```
+
+### Low-Risk Patient
+
+*Age 38, Female, Non-Anginal Pain, Normal BP, Healthy Cholesterol, High Max HR, No Exercise Angina, No ST Depression, 0 vessels colored, Normal Thal.*
+
+```python
+import pandas as pd, joblib
+
+model = joblib.load('best_heart_disease_model.pkl')
+
+patient = pd.DataFrame([{
+    'age': 38, 'sex': 0, 'cp': 2, 'trestbps': 110,
+    'chol': 180, 'fbs': 0, 'restecg': 1, 'thalach': 172,
+    'exang': 0, 'oldpeak': 0.0, 'slope': 2, 'ca': 0, 'thal': 2
+}])
+
+pred  = model.predict(patient)[0]
+proba = model.predict_proba(patient)[0]
+
+print(f"Prediction  : {'⚠ HIGH RISK' if pred == 1 else '✓ Low Risk'}")
+print(f"Probability : No Disease={proba[0]:.2%}  |  Heart Disease={proba[1]:.2%}")
+# Expected → Prediction: ✓ Low Risk
 ```
 
 ---
 
 ## Dataset Note
 
-The `heart.csv` file (1025 rows) is the Cleveland Heart Disease dataset from Kaggle. It contains 723 duplicate rows (only 302 unique records) and ships with **inverted target labels** (`0` = disease, `1` = no disease — opposite of clinical convention).
+The raw `heart.csv` (1025 rows) is the Cleveland Heart Disease dataset from Kaggle. It contains **722 duplicate rows** (only 303 unique records) and ships with **inverted target labels** (`0` = disease, `1` = no disease — opposite of clinical convention).
 
-The training pipeline corrects this automatically with `y = 1 - df['target']` before fitting. The CSV file itself is never modified.
+`Heart_cleaned.csv` is the corrected, deduplicated version used for training:
+- Duplicates removed → **303 unique rows**
+- Target labels flipped → `1` = Heart Disease, `0` = No Disease
+
+The training pipeline applies `df['target'] = 1 - df['target']` after loading to ensure labels follow standard clinical convention before fitting.
 
 ---
 
