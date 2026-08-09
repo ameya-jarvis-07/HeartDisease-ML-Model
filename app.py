@@ -1,11 +1,13 @@
+import os
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import joblib
 
 app = Flask(__name__)
 
+model_path = os.path.join(os.path.dirname(__file__), 'best_heart_disease_model.pkl')
 try:
-    model = joblib.load('best_heart_disease_model.pkl')
+    model = joblib.load(model_path)
     print("Model loaded successfully.")
 except Exception as e:
     print(f"Error loading model: {e}")

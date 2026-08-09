@@ -1,0 +1,7 @@
+.git
+.vscode
+detection.ipynb
+Heart_cleaned.csv
+heart.csv
+__pycache__
+*.pyc
