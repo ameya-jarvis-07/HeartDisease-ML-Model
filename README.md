@@ -8,6 +8,8 @@
 
 ![CardioScan AI](https://img.shields.io/badge/Status-Live-brightgreen) ![Python](https://img.shields.io/badge/Python-3.10%2B-blue) ![Flask](https://img.shields.io/badge/Flask-Backend-lightgrey) ![Accuracy](https://img.shields.io/badge/Model%20Accuracy-95.61%25-success)
 
+Live deployment: https://heart.ameyajarvis.qzz.io
+
 ---
 
 ## Project Structure
